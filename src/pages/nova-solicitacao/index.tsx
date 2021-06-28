@@ -11,6 +11,7 @@ import Input from '../../components/Input';
 import TextArea from '../../components/TextArea';
 import { Container } from './styles';
 import api from 'services/api';
+import { useToast } from 'hooks/toast';
 
 interface SignUpFormData {
   aluno: string;
@@ -22,6 +23,8 @@ interface SignUpFormData {
 const NovaSolicitacao: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const history = useHistory();
+
+  const { addToast } = useToast();
 
   const handleSubmit = useCallback(
     async (data: SignUpFormData) => {
@@ -45,6 +48,12 @@ const NovaSolicitacao: React.FC = () => {
           descricao: data.corpo,
         });
 
+        addToast({
+          type: 'success',
+          title: 'Sucesso',
+          description: 'Solicitação criada com sucesso.',
+        });
+
         history.push('/solicitacoes');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -56,7 +65,7 @@ const NovaSolicitacao: React.FC = () => {
         }
       }
     },
-    [history],
+    [history, addToast],
   );
 
   return (

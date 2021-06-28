@@ -1,4 +1,3 @@
-import { shade } from 'polished';
 import styled, { css } from 'styled-components';
 
 type StyledButtonProps = {

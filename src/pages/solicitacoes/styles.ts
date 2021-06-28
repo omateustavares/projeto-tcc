@@ -68,8 +68,7 @@ export const Container = styled.div`
           border-radius: 5px;
 
           th:first-child {
-            padding: 0.5rem;
-            width: 10%;
+            padding: 0rem 1rem 0 1rem;
             border-right: 3px solid var(--background-body);
             font-weight: 500;
             font-size: 18px;

@@ -2,5 +2,8 @@
   "screen.login.button": "Entrar",
   "screen.login.option": "Fazer cadastro",
 
+  "screen.home.button.back": "Voltar",
+  "screen.home.button.logout": "Sair",
+
   "screen.new.solicitation": "ENVIAR SOLICITAÇÃO"
 }

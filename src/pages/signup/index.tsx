@@ -19,11 +19,9 @@ import InputMask from '../../components/InputMask';
 import Select from '../../components/Select';
 import InputMaskCellPhone from '../../components/InputMaskCellPhone';
 
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
 import { Container, Content } from './styles';
 import api from 'services/api';
+import { useToast } from 'hooks/toast';
 
 interface SignUpFormData {
   nome: string;
@@ -37,6 +35,7 @@ interface SignUpFormData {
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const history = useHistory();
+  const { addToast } = useToast();
 
   const handleSubmit = useCallback(
     async (data: SignUpFormData) => {
@@ -61,9 +60,10 @@ const SignUp: React.FC = () => {
 
         history.push('/');
 
-        toast.success('Cadastro realizado!', {
-          position: toast.POSITION.TOP_RIGHT,
-          // onClose: () => router.push('/'),
+        addToast({
+          type: 'success',
+          title: 'Cadastro realizado com  sucesso',
+          description: 'Você já pode fazer seu logon no Sysweb',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -73,19 +73,18 @@ const SignUp: React.FC = () => {
 
           return;
         }
-
-        // toast.error('Ocorreu um erro ao fazer cadastro, tente novamente', {
-        //   position: toast.POSITION.TOP_RIGHT,
-        // });
+        addToast({
+          type: 'error',
+          title: 'Erro no cadastro',
+          description: 'Ocorreu um erro no fazer o cadastro, tente novamente',
+        });
       }
     },
-    [history],
+    [addToast, history],
   );
 
   return (
     <>
-      <ToastContainer />
-
       <Container>
         <Content>
           <Form ref={formRef} onSubmit={handleSubmit}>

@@ -15,6 +15,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from '../../hooks/Auth';
 import { useHistory } from 'react-router-dom';
+import { useToast } from 'hooks/toast';
 
 type SignInFormData = {
   email: string;
@@ -26,6 +27,7 @@ const SignIn: React.FC = () => {
   const history = useHistory();
 
   const { signIn } = useAuth();
+  const { addToast } = useToast();
 
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {
@@ -57,9 +59,15 @@ const SignIn: React.FC = () => {
 
           return;
         }
+
+        addToast({
+          type: 'error',
+          title: 'Erro na autenticação',
+          description: 'Ocorreu um erro no fazer login, cheque as credenciais',
+        });
       }
     },
-    [signIn],
+    [addToast, signIn, history],
   );
 
   return (

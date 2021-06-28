@@ -1,34 +1,48 @@
+import { useCallback } from 'react';
+import fm from 'format-message';
 import Button from '../Button';
 import { useAuth } from 'hooks/Auth';
 import { Container, Content } from './styles';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const history = useHistory();
-  const { pathname } = useLocation();
-  console.log(pathname);
+  const location = useLocation();
+  const namePath = location.pathname.replace(/\//g, '');
+
+  const handleButton = useCallback(() => {
+    if (namePath !== 'solicitacoes') {
+      history.push('/solicitacoes');
+    } else {
+      signOut();
+    }
+  }, [namePath, history, signOut]);
 
   return (
-    <Container>
-      <Content>
-        <div>
-          {pathname !== '/solicitacoes' && (
-            <Button
-              buttonStyle="blue"
-              type="submit"
-              onClick={() => {
-                history.push('/solicitacoes');
-              }}
-            >
-              Voltar
-            </Button>
-          )}
-        </div>
-        <nav>
-          <span>{user}</span>
-        </nav>
-      </Content>
-    </Container>
+    <>
+      {user !== undefined && (
+        <Container>
+          <Content>
+            <div>
+              <Button
+                buttonStyle="blue"
+                type="submit"
+                onClick={() => {
+                  handleButton();
+                }}
+              >
+                {namePath !== 'solicitacoes'
+                  ? fm('screen.home.button.back')
+                  : fm('screen.home.button.logout')}
+              </Button>
+            </div>
+            <nav>
+              <span>{user}</span>
+            </nav>
+          </Content>
+        </Container>
+      )}
+    </>
   );
 }

@@ -7,39 +7,93 @@ import { useEffect } from 'react';
 import api from '../../services/api';
 import Loader from 'react-loader-spinner';
 import { useHistory } from 'react-router-dom';
+import { useToast } from 'hooks/toast';
+import getStatusSolicitacao from 'utils/getStatusSolicitation';
 
-type Solicitation = {
+interface Solicitation {
   id: string;
   nome_escola: string;
   status: string;
-};
+  status_finalizado: any;
+}
+interface SolicitationFormated extends Solicitation {
+  statusFormat: any;
+}
 
 const Solicitacoes: React.FC = () => {
-  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [solicitations, setSolicitations] = useState<SolicitationFormated[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(false);
+
+  const { addToast } = useToast();
+
   const history = useHistory();
 
   useEffect(() => {
     setIsLoading(true);
     const load = async () => {
-      await api.get('/solicitacaoAdministracao/list').then(res => {
-        setSolicitations(res.data);
-        setIsLoading(false);
-      });
+      await api
+        .get<Solicitation[]>('/solicitacaoAdministracao/list')
+        .then(response => {
+          const data = response.data.map(solicitacao => ({
+            ...solicitacao,
+            statusFormat: getStatusSolicitacao(
+              solicitacao.status,
+              solicitacao.status_finalizado,
+            ),
+          }));
+
+          setSolicitations(data);
+          setIsLoading(false);
+        });
+
+      await api
+        .get<Solicitation[]>('/solicitacaoEspecialista/listOpen')
+        .then(response => {
+          const data = response.data.map(solicitacao => ({
+            ...solicitacao,
+            statusFormat: getStatusSolicitacao(
+              solicitacao.status,
+              solicitacao.status_finalizado,
+            ),
+          }));
+
+          setSolicitations(data);
+          setIsLoading(false);
+        });
     };
 
     load();
   }, []);
 
-  const handleDeleteSolicitation = useCallback(async id => {
-    await api.delete(`/solicitacaoAdministracao/delete/${id}`).then(res => {
-      console.log(res);
-    });
-  }, []);
+  const handleDeleteSolicitation = useCallback(
+    async id => {
+      try {
+        await api.delete(`/solicitacaoAdministracao/delete/${id}`);
 
-  const handleViewerSolicitation = useCallback(async id => {
-    history.push(`/visualizar-solicitacao/${id}`);
-  }, []);
+        addToast({
+          type: 'success',
+          title: 'Sucesso',
+          description: 'Solicitação deletada com sucesso.',
+        });
+      } catch (error) {
+        addToast({
+          type: 'info',
+          title: 'Atenção',
+          description: `${error.response.data.message}`,
+        });
+      }
+    },
+    [addToast],
+  );
+
+  const handleViewerSolicitation = useCallback(
+    async id => {
+      history.push(`/visualizar-solicitacao/${id}`);
+    },
+    [history],
+  );
 
   const handleNewSolicitaion = () => {
     history.push('/nova-solicitacao');
@@ -76,7 +130,7 @@ const Solicitacoes: React.FC = () => {
               <>
                 {solicitations.map(solicitation => (
                   <tr key={solicitation.id}>
-                    <th>{solicitation.status ? 'Encerrado' : 'Aberto'}</th>
+                    <th>{solicitation.statusFormat}</th>
                     <th>
                       <div>
                         <strong>{solicitation.nome_escola}</strong>

@@ -53,7 +53,8 @@ export const Container = styled.div`
     }
   }
 
-  .student {
+  .student,
+  .occupation {
     display: flex;
     flex-direction: row;
   }

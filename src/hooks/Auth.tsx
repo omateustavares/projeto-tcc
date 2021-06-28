@@ -15,10 +15,12 @@ interface User {
 interface AuthState {
   token: string;
   user: User;
+  role: string;
 }
 
 interface AuthContextData {
   user: User;
+  role: string;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
 }
@@ -31,11 +33,12 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const token = localStorage.getItem('@SysWeb:token');
     const user = localStorage.getItem('@SysWeb:user');
+    const role = localStorage.getItem('@SysWeb:role');
 
-    if (token && user) {
+    if (token && user && role) {
       api.defaults.headers.authorization = `Bearer ${token}`;
 
-      return { token, user: JSON.parse(user) };
+      return { token, user: JSON.parse(user), role: JSON.parse(role) };
     }
 
     return {} as AuthState;
@@ -47,14 +50,15 @@ const AuthProvider: React.FC = ({ children }) => {
       senha,
     });
 
-    const { token, nome: user } = response.data;
+    const { token, nome: user, role } = response.data;
 
     localStorage.setItem('@SysWeb:token', token);
     localStorage.setItem('@SysWeb:user', JSON.stringify(user));
+    localStorage.setItem('@SysWeb:role', JSON.stringify(role));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
 
-    setData({ token, user });
+    setData({ token, user, role });
   }, []);
 
   const signOut = useCallback(() => {
@@ -65,7 +69,9 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: data.user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user: data.user, role: data.role, signIn, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
