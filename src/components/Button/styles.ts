@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 
 type StyledButtonProps = {
   buttonStyle: 'red' | 'blue';
+  disabled?: boolean;
 };
 
 export const Container = styled.button<StyledButtonProps>`
@@ -15,6 +16,12 @@ export const Container = styled.button<StyledButtonProps>`
     props.buttonStyle === 'blue' &&
     css`
       background: var(--blue-one);
+    `}
+
+    ${props =>
+    props.disabled &&
+    css`
+      background: var(--text);
     `}
 
   height: 56px;

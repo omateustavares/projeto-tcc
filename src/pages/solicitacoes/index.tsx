@@ -9,6 +9,7 @@ import Loader from 'react-loader-spinner';
 import { useHistory } from 'react-router-dom';
 import { useToast } from 'hooks/toast';
 import getStatusSolicitacao from 'utils/getStatusSolicitation';
+import { useAuth } from 'hooks/Auth';
 
 interface Solicitation {
   id: string;
@@ -24,48 +25,69 @@ const Solicitacoes: React.FC = () => {
   const [solicitations, setSolicitations] = useState<SolicitationFormated[]>(
     [],
   );
+  const [solicitationsAccepeted, setSolicitationsAccepeted] = useState<
+    SolicitationFormated[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { addToast } = useToast();
+
+  const { role } = useAuth();
 
   const history = useHistory();
 
   useEffect(() => {
     setIsLoading(true);
     const load = async () => {
-      await api
-        .get<Solicitation[]>('/solicitacaoAdministracao/list')
-        .then(response => {
-          const data = response.data.map(solicitacao => ({
-            ...solicitacao,
-            statusFormat: getStatusSolicitacao(
-              solicitacao.status,
-              solicitacao.status_finalizado,
-            ),
-          }));
+      if (role === 'CRAS') {
+        await api
+          .get<Solicitation[]>('/solicitacaoEspecialista/listOpen')
+          .then(response => {
+            const data = response.data.map(solicitacao => ({
+              ...solicitacao,
+              statusFormat: getStatusSolicitacao(
+                solicitacao.status,
+                solicitacao.status_finalizado,
+              ),
+            }));
 
-          setSolicitations(data);
-          setIsLoading(false);
-        });
+            setSolicitations(data);
+            setIsLoading(false);
+          });
+        await api
+          .get<Solicitation[]>('/solicitacaoEspecialista/listAccept')
+          .then(response => {
+            const data = response.data.map(solicitacao => ({
+              ...solicitacao,
+              statusFormat: getStatusSolicitacao(
+                solicitacao.status,
+                solicitacao.status_finalizado,
+              ),
+            }));
 
-      await api
-        .get<Solicitation[]>('/solicitacaoEspecialista/listOpen')
-        .then(response => {
-          const data = response.data.map(solicitacao => ({
-            ...solicitacao,
-            statusFormat: getStatusSolicitacao(
-              solicitacao.status,
-              solicitacao.status_finalizado,
-            ),
-          }));
+            setSolicitationsAccepeted(data);
+            setIsLoading(false);
+          });
+      } else {
+        await api
+          .get<Solicitation[]>('/solicitacaoAdministracao/list')
+          .then(response => {
+            const data = response.data.map(solicitacao => ({
+              ...solicitacao,
+              statusFormat: getStatusSolicitacao(
+                solicitacao.status,
+                solicitacao.status_finalizado,
+              ),
+            }));
 
-          setSolicitations(data);
-          setIsLoading(false);
-        });
+            setSolicitations(data);
+            setIsLoading(false);
+          });
+      }
     };
 
     load();
-  }, []);
+  }, [role]);
 
   const handleDeleteSolicitation = useCallback(
     async id => {
@@ -111,9 +133,11 @@ const Solicitacoes: React.FC = () => {
               <th>ESCOLA</th>
               <th>
                 <div>
-                  <Button onClick={handleNewSolicitaion} buttonStyle="blue">
-                    NOVA SOLICITAÇÃO
-                  </Button>
+                  {role !== 'CRAS' && (
+                    <Button onClick={handleNewSolicitaion} buttonStyle="blue">
+                      NOVA SOLICITAÇÃO
+                    </Button>
+                  )}
                 </div>
               </th>
             </tr>
@@ -143,19 +167,58 @@ const Solicitacoes: React.FC = () => {
                           onClick={() => {
                             handleViewerSolicitation(solicitation.id);
                           }}
+                          // disabled={solicitation.statusFormat === 'Encerrado'}
                         >
                           ABRIR
                         </Button>
                       </div>
                       <div>
+                        {role !== 'CRAS' && (
+                          <Button
+                            buttonStyle="red"
+                            onClick={() => {
+                              handleDeleteSolicitation(solicitation.id);
+                            }}
+                          >
+                            ENCERRAR
+                          </Button>
+                        )}
+                      </div>
+                    </th>
+                  </tr>
+                ))}
+
+                {solicitationsAccepeted.map(solicitation => (
+                  <tr key={solicitation.id}>
+                    <th>{solicitation.statusFormat}</th>
+                    <th>
+                      <div>
+                        <strong>{solicitation.nome_escola}</strong>
+                      </div>
+                    </th>
+                    <th>
+                      <div>
                         <Button
-                          buttonStyle="red"
+                          buttonStyle="blue"
                           onClick={() => {
-                            handleDeleteSolicitation(solicitation.id);
+                            handleViewerSolicitation(solicitation.id);
                           }}
                         >
-                          ENCERRAR
+                          ABRIR
                         </Button>
+                      </div>
+                      <div>
+                        {role !== 'CRAS' && (
+                          <Button
+                            buttonStyle="red"
+                            onClick={() => {
+                              handleDeleteSolicitation(solicitation.id);
+                            }}
+                            disabled={solicitation.statusFormat === 'Encerrado'}
+                          >
+                            ENCERRAR
+                          </Button>
+                        )}
                       </div>
                     </th>
                   </tr>

@@ -1,7 +1,9 @@
 import { useAuth } from 'hooks/Auth';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useToast } from 'hooks/toast';
+import { useCallback, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import api from 'services/api';
+import Button from '../../components/Button';
 
 import { Container } from './styles';
 interface ParamTypes {
@@ -26,8 +28,9 @@ const VisualizarSolicitacao: React.FC = () => {
   const [information, setInformation] = useState<InformationData>();
   const [statusSolicitation, setStatusSolicitation] = useState('');
 
+  const history = useHistory();
+  const { addToast } = useToast();
   const { role } = useAuth();
-  console.log(role);
 
   useEffect(() => {
     const load = async () => {
@@ -46,9 +49,22 @@ const VisualizarSolicitacao: React.FC = () => {
       }
     };
     load();
-  }, [id]);
+  }, [role, id]);
 
   useEffect(() => {
+    //Casos Encerrados
+    if (role === 'CRAS' && information?.status === true) {
+      setStatusSolicitation('Encerrado');
+    }
+
+    if (
+      role === 'ESCOLA' &&
+      information?.status === true &&
+      information.status_finalizado === true
+    ) {
+      setStatusSolicitation('Encerrado');
+    }
+
     if (
       information?.status === true &&
       information.status_finalizado === null
@@ -62,7 +78,47 @@ const VisualizarSolicitacao: React.FC = () => {
     ) {
       setStatusSolicitation('Disponível');
     }
-  }, [information]);
+  }, [information, role]);
+
+  const handleAccepetSolicitacion = useCallback(async () => {
+    try {
+      await api.put(`/solicitacaoEspecialista/accepet/${id}`);
+
+      addToast({
+        type: 'success',
+        title: 'Solicitação',
+        description: 'Solicitação aceita com sucesso.',
+      });
+
+      history.push('/solicitacoes');
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Solicitação',
+        description: 'Error ao aceita a solicitação, tente novamente.',
+      });
+    }
+  }, [id, addToast, history]);
+
+  const handleFinishSolicitation = useCallback(async () => {
+    try {
+      await api.put(`/solicitacaoEspecialista/finish/${id}`);
+
+      addToast({
+        type: 'success',
+        title: 'Solicitação',
+        description: 'Solicitação finalizada com sucesso.',
+      });
+
+      history.push('/solicitacoes');
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Solicitação',
+        description: 'Error ao aceita a solicitação, tente novamente.',
+      });
+    }
+  }, [id, addToast, history]);
 
   return (
     <Container>
@@ -126,6 +182,28 @@ const VisualizarSolicitacao: React.FC = () => {
             </div>
           </>
         )}
+        <div className="information--buttons">
+          {role !== 'ESCOLA' && statusSolicitation === 'Disponível' && (
+            <Button
+              buttonStyle="blue"
+              onClick={handleAccepetSolicitacion}
+              type="submit"
+            >
+              Aceitar
+            </Button>
+          )}
+
+          {statusSolicitation !== 'Disponível' &&
+            statusSolicitation !== 'Encerrado' && (
+              <Button
+                buttonStyle="blue"
+                onClick={handleFinishSolicitation}
+                type="submit"
+              >
+                Finalizar
+              </Button>
+            )}
+        </div>
       </section>
     </Container>
   );
