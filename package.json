@@ -2,6 +2,11 @@
   "name": "projeto-tcc",
   "version": "0.1.0",
   "private": true,
+  "config": {
+    "commitizen": {
+      "path": "cz-emoji"
+    }
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -37,13 +42,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts",
+    "commit": "cz"
   },
   "browserslist": {
     "production": [
@@ -60,6 +60,7 @@
   "devDependencies": {
     "@types/react-input-mask": "^3.0.0",
     "@types/styled-components": "^5.1.10",
+    "eslint": "^7.29.0",
     "tsconfig-paths": "^3.9.0"
   }
 }
