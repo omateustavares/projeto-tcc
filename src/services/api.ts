@@ -1,6 +1,6 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://191.252.100.38',
+  baseURL: 'https://apitesttcc.protestodireto.com.br',
 });
 export default api;
