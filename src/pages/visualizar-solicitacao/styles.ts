@@ -51,6 +51,18 @@ export const Container = styled.div`
         color: var(--text);
       }
     }
+
+    &--buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+
+      button {
+        margin: 1rem;
+        width: auto;
+        height: 2.5rem;
+      }
+    }
   }
 
   .student,
