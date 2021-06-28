@@ -7,15 +7,12 @@
       "path": "cz-emoji"
     }
   },
-<<<<<<< HEAD
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
   },
-=======
->>>>>>> 094cfce17baa20de53a3ae950a8145bdedefaaaf
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
