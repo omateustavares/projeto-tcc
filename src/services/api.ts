@@ -1,6 +1,6 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://apitesttcc.protestodireto.com.br',
+  baseURL: 'https://api.tavarestech.com.br',
 });
 export default api;
