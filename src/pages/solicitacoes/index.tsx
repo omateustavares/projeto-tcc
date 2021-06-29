@@ -87,12 +87,16 @@ const Solicitacoes: React.FC = () => {
     };
 
     load();
-  }, [role]);
+  }, [role, setSolicitations]);
 
   const handleDeleteSolicitation = useCallback(
     async id => {
       try {
         await api.delete(`/solicitacaoAdministracao/delete/${id}`);
+
+        setSolicitations(solicitations =>
+          solicitations.filter(item => item.id !== id),
+        );
 
         addToast({
           type: 'success',
